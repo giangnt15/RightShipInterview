@@ -1,0 +1,6 @@
+@RightShip.OrderService.WebApi_HostAddress = http://localhost:5213
+
+GET {{RightShip.OrderService.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
