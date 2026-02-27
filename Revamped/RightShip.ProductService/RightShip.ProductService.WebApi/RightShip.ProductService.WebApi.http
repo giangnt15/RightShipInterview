@@ -1,0 +1,6 @@
+@RightShip.ProductService.WebApi_HostAddress = http://localhost:5118
+
+GET {{RightShip.ProductService.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
