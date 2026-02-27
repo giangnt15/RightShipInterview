@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <Description>Contains the core domain entities and interfaces for the RightShip application. Using DDD (Domain-Driven Design) principles.</Description>
+  </PropertyGroup>
+
+</Project>
