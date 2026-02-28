@@ -13,6 +13,6 @@
     /// <typeparam name="T"></typeparam>
     public class BaseEntity<T> : BaseEntity, IEntity<T>
     {
-        public required T Id { get; set; }
+        public T Id { get; set; }
     }
 }
