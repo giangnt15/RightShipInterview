@@ -1,9 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RightShip.OrderService.WebApi", "RightShip.OrderService.WebApi\RightShip.OrderService.WebApi.csproj", "{198D0553-88FC-4030-AEF7-4EB4D398BF77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.OrderService.WebApi", "RightShip.OrderService.WebApi\RightShip.OrderService.WebApi.csproj", "{198D0553-88FC-4030-AEF7-4EB4D398BF77}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.OrderService.Application", "RightShip.OrderService.Application\RightShip.OrderService.Application.csproj", "{B9140E76-CD31-41E2-A490-1E90BAC4DFA1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.OrderService.Application.Contracts", "RightShip.OrderService.Application.Contracts\RightShip.OrderService.Application.Contracts.csproj", "{13636214-C075-487E-B443-BE4E595F7D50}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.OrderService.Domain", "RightShip.OrderService.Domain\RightShip.OrderService.Domain.csproj", "{5F7DE894-72BB-47E3-8905-62C184773923}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.OrderService.Domain.Shared", "RightShip.OrderService.Domain.Shared\RightShip.OrderService.Domain.Shared.csproj", "{681C43D5-4A95-4380-82AD-8C8861543BBE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.OrderService.Infrastructure", "RightShip.OrderService.Infrastructure\RightShip.OrderService.Infrastructure.csproj", "{BC8C295A-9416-474C-8675-E12249F1AE61}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.OrderService.Persistence.EfCore", "RightShip.OrderService.Persistence.EfCore\RightShip.OrderService.Persistence.EfCore.csproj", "{56C6D27C-B7D4-497C-9DAC-F0E0A1157C00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RightShip.OrderService.UnitTest", "RightShip.OrderService.UnitTest\RightShip.OrderService.UnitTest.csproj", "{4EA15133-1741-4608-B589-7C94C0A5E08C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +29,39 @@ Global
 		{198D0553-88FC-4030-AEF7-4EB4D398BF77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{198D0553-88FC-4030-AEF7-4EB4D398BF77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{198D0553-88FC-4030-AEF7-4EB4D398BF77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9140E76-CD31-41E2-A490-1E90BAC4DFA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9140E76-CD31-41E2-A490-1E90BAC4DFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9140E76-CD31-41E2-A490-1E90BAC4DFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9140E76-CD31-41E2-A490-1E90BAC4DFA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13636214-C075-487E-B443-BE4E595F7D50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13636214-C075-487E-B443-BE4E595F7D50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13636214-C075-487E-B443-BE4E595F7D50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13636214-C075-487E-B443-BE4E595F7D50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F7DE894-72BB-47E3-8905-62C184773923}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F7DE894-72BB-47E3-8905-62C184773923}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F7DE894-72BB-47E3-8905-62C184773923}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F7DE894-72BB-47E3-8905-62C184773923}.Release|Any CPU.Build.0 = Release|Any CPU
+		{681C43D5-4A95-4380-82AD-8C8861543BBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{681C43D5-4A95-4380-82AD-8C8861543BBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{681C43D5-4A95-4380-82AD-8C8861543BBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{681C43D5-4A95-4380-82AD-8C8861543BBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC8C295A-9416-474C-8675-E12249F1AE61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC8C295A-9416-474C-8675-E12249F1AE61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC8C295A-9416-474C-8675-E12249F1AE61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC8C295A-9416-474C-8675-E12249F1AE61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56C6D27C-B7D4-497C-9DAC-F0E0A1157C00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56C6D27C-B7D4-497C-9DAC-F0E0A1157C00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56C6D27C-B7D4-497C-9DAC-F0E0A1157C00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56C6D27C-B7D4-497C-9DAC-F0E0A1157C00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EA15133-1741-4608-B589-7C94C0A5E08C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EA15133-1741-4608-B589-7C94C0A5E08C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EA15133-1741-4608-B589-7C94C0A5E08C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EA15133-1741-4608-B589-7C94C0A5E08C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2A135A9D-96ED-486D-BE1B-3A126DD482BB}
 	EndGlobalSection
 EndGlobal
