@@ -24,6 +24,10 @@ public class Order : AggregateRoot<Guid>, IHasCreationInfo, IHasModificationInfo
     public DateTime UpdatedAt { get; set; }
     public Guid UpdatedBy { get; set; }
 
+    /// <summary>
+    /// Don't expose the lines collection directly to the application layer.
+    /// This forces the application layer to use the AddLines method to add lines to the order.
+    /// </summary>
     public IReadOnlyCollection<OrderLine> Lines => _lines.AsReadOnly();
 
     public Money Total { get; private set; } = Money.Zero();
@@ -33,25 +37,32 @@ public class Order : AggregateRoot<Guid>, IHasCreationInfo, IHasModificationInfo
     {
     }
 
-    public static Order Create(Guid customerId, IEnumerable<OrderLine>? lines, Guid createdBy)
+    /// <summary>
+    /// Create order from line data (productId, quantity, unitPrice). Use this from the application layer.
+    /// </summary>
+    public static Order Create(Guid customerId, IEnumerable<(Guid productId, int quantity, decimal unitPrice)> lineData, Guid createdBy)
     {
         if (customerId == Guid.Empty)
         {
             throw new CustomerIdRequiredException();
         }
 
-        var order = new Order();
-
-        var linePayloads = (lines ?? Enumerable.Empty<OrderLine>())
-            .Select(l => new OrderLinePayload
+        var linePayloads = (lineData ?? Enumerable.Empty<(Guid, int, decimal)>())
+            .Select(d => new OrderLinePayload
             {
                 OrderLineId = Guid.NewGuid(),
-                ProductId = l.ProductId,
-                Quantity = l.Quantity,
-                UnitPrice = l.UnitPrice.Amount
+                ProductId = d.productId,
+                Quantity = d.quantity,
+                UnitPrice = d.unitPrice
             })
             .ToList();
 
+        if (linePayloads.Count == 0)
+        {
+            throw new OrderLinesRequiredException();
+        }
+
+        var order = new Order();
         var initialTotal = linePayloads.Aggregate(0m, (acc, p) => acc + (p.UnitPrice * p.Quantity));
 
         var createdEvent = new OrderCreated
@@ -66,6 +77,16 @@ public class Order : AggregateRoot<Guid>, IHasCreationInfo, IHasModificationInfo
         order.Apply(createdEvent);
 
         return order;
+    }
+
+    /// <summary>
+    /// Create order from OrderLine entities. Used by domain tests and internal flows.
+    /// </summary>
+    public static Order Create(Guid customerId, IEnumerable<OrderLine>? lines, Guid createdBy)
+    {
+        var lineData = (lines ?? Enumerable.Empty<OrderLine>())
+            .Select(l => (l.ProductId, l.Quantity, l.UnitPrice.Amount));
+        return Create(customerId, lineData, createdBy);
     }
 
     public void AddLine(Guid productId, int quantity, Money unitPrice)
