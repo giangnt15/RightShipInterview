@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RightShip.OrderService.Application.Contracts.Orders;
 
 namespace RightShip.OrderService.WebApi.Controllers;
@@ -41,11 +42,14 @@ public class OrdersController : ControllerBase
 
     /// <summary>
     /// Create a new order. Validates products and reserves stock via Product Service.
+    /// Rate limited per X-Created-By header (falls back to IP when absent).
     /// </summary>
     [HttpPost]
+    [EnableRateLimiting("OrderCreation")]
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Create(
