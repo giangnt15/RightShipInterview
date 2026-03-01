@@ -9,6 +9,13 @@ public record class ProductQuantity : BaseValueObject
 {
     public int Value { get; init; }
 
+    /// <summary>
+    /// For EF Core materialization only.
+    /// </summary>
+    private ProductQuantity()
+    {
+    }
+
     public ProductQuantity(int value)
     {
         if (value < 0)

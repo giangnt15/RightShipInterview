@@ -10,7 +10,7 @@ namespace RightShip.Core.Persistence.EfCore;
 /// </summary>
 /// <typeparam name="TDbContext">The type of the DbContext, must implement <see cref="BaseEfCoreDbContext"/></typeparam>
 /// <typeparam name="TDbContextFactory">The type of the DbContextFactory, must implement <see cref="BaseEfCoreDbContextFactory"/></typeparam>
-public class EfCoreUow<TDbContext, TDbContextFactory> : IUnitOfWork where TDbContext : BaseEfCoreDbContext where TDbContextFactory : BaseEfCoreDbContextFactory<TDbContext>, IDisposable, IAsyncDisposable
+public class EfCoreUow<TDbContext, TDbContextFactory> : IUnitOfWork, IDisposable, IAsyncDisposable where TDbContext : BaseEfCoreDbContext where TDbContextFactory : BaseEfCoreDbContextFactory<TDbContext>
 {
     protected readonly TDbContextFactory _dbContextFactory;
     protected TDbContext? _dbContext;
@@ -42,7 +42,13 @@ public class EfCoreUow<TDbContext, TDbContextFactory> : IUnitOfWork where TDbCon
         _dbContext ??= await _dbContextFactory.CreateDbContextAsync(cancellationToken);
     }
 
-    public TRepository GetRepository<TRepository>() where TRepository : IRepository
+    /// <summary>
+    /// Get a repository for a specific type.
+    /// We can use DI to get the repository because inside a request scope, the DbContext is shared.
+    /// </summary>
+    /// <typeparam name="TRepository">The type of the repository</typeparam>
+    /// <returns>The repository</returns>
+    public virtual TRepository GetRepository<TRepository>() where TRepository : IRepository
     {
         return _serviceProvider.GetRequiredService<TRepository>();
     }

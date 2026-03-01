@@ -99,6 +99,34 @@ public abstract class BaseEfCoreDbContext : DbContext
         aggregateRootEntries.ForEach(x => (x.Entity as IAggregateRoot)?.ClearDistributedEvents());
         return affected;
     }
+    
+    /// <summary>
+    /// Save the changes to the database.
+    /// This method is overridden to ensure that the outbox messages are saved to the database in the same transaction as the aggregate roots.
+    /// </summary>
+    /// <returns>The number of affected rows.</returns>
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var changedEntries = GetChangedEntities();
+        var aggregateRootEntries = GetChangedAggregateRootEntries(changedEntries);
+        var outboxMsgs = GetOutboxMessages(aggregateRootEntries);
+        if (outboxMsgs.Count > 0)
+        {
+            AddRange(outboxMsgs);
+            foreach (var outboxMsg in outboxMsgs)
+            {
+                var entry = Entry(outboxMsg);
+                if (entry.State != EntityState.Added)
+                {
+                    entry.State = EntityState.Added;
+                }
+            }
+        }
+        ChangeTracker.DetectChanges();
+        var affected = await base.SaveChangesAsync(cancellationToken);
+        aggregateRootEntries.ForEach(x => (x.Entity as IAggregateRoot)?.ClearDistributedEvents());
+        return affected;
+    }
 
     /// <summary>
     /// Get the outbox messages for the aggregate roots.
