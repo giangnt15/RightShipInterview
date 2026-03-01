@@ -59,11 +59,12 @@ public class ProductsController : ControllerBase
     }
 
     /// <summary>
-    /// Create a new product.
+    /// Create a new product. Exceptions are handled by GlobalExceptionHandler.
     /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(ProductDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Create(
         [FromBody] CreateProductDto dto,
         [FromHeader(Name = "X-Created-By")] Guid? createdBy,

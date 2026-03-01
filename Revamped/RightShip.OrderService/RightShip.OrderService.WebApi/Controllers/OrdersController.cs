@@ -5,6 +5,7 @@ namespace RightShip.OrderService.WebApi.Controllers;
 
 /// <summary>
 /// Order API controller.
+/// Exceptions are handled by GlobalExceptionHandler.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -34,11 +35,14 @@ public class OrdersController : ControllerBase
     }
 
     /// <summary>
-    /// Create a new order.
+    /// Create a new order. Validates products and reserves stock via Product Service.
     /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Create(
         [FromBody] CreateOrderDto dto,
         [FromHeader(Name = "X-Created-By")] Guid? createdBy,

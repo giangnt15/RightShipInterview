@@ -1,5 +1,6 @@
 using RightShip.Core.Application.Uow;
 using Moq;
+using RightShip.OrderService.Application.Contracts.Integration;
 using RightShip.OrderService.Application.Contracts.Orders;
 using RightShip.OrderService.Application.Orders;
 using RightShip.OrderService.Domain.Entities;
@@ -12,6 +13,7 @@ public class OrderAppServiceTests
 {
     private Mock<IUnitOfWork> _unitOfWorkMock = null!;
     private Mock<IOrderRepository> _orderRepositoryMock = null!;
+    private Mock<IProductServiceClient> _productServiceClientMock = null!;
     private OrderAppService _sut = null!;
 
     [SetUp]
@@ -19,6 +21,7 @@ public class OrderAppServiceTests
     {
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _orderRepositoryMock = new Mock<IOrderRepository>();
+        _productServiceClientMock = new Mock<IProductServiceClient>();
         _unitOfWorkMock
             .Setup(x => x.StartAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -28,8 +31,14 @@ public class OrderAppServiceTests
         _unitOfWorkMock
             .Setup(x => x.GetRepository<IOrderRepository>())
             .Returns(_orderRepositoryMock.Object);
+        _productServiceClientMock
+            .Setup(x => x.GetProductPriceAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Guid id, CancellationToken _) => id.GetHashCode() % 100 == 0 ? 10m : 5m);
+        _productServiceClientMock
+            .Setup(x => x.ReserveStockAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
-        _sut = new OrderAppService(_unitOfWorkMock.Object);
+        _sut = new OrderAppService(_unitOfWorkMock.Object, _productServiceClientMock.Object);
     }
 
     [Test]
@@ -81,13 +90,16 @@ public class OrderAppServiceTests
         var customerId = Guid.NewGuid();
         var createdBy = Guid.NewGuid();
         var productId = Guid.NewGuid();
+        var productId2 = Guid.NewGuid();
+        _productServiceClientMock.Setup(x => x.GetProductPriceAsync(productId, It.IsAny<CancellationToken>())).ReturnsAsync(10m);
+        _productServiceClientMock.Setup(x => x.GetProductPriceAsync(productId2, It.IsAny<CancellationToken>())).ReturnsAsync(5m);
         var dto = new CreateOrderDto
         {
             CustomerId = customerId,
             Lines =
             [
-                new CreateOrderLineDto { ProductId = productId, Quantity = 2, UnitPrice = 10m },
-                new CreateOrderLineDto { ProductId = Guid.NewGuid(), Quantity = 1, UnitPrice = 5m }
+                new CreateOrderLineDto { ProductId = productId, Quantity = 2 },
+                new CreateOrderLineDto { ProductId = productId2, Quantity = 1 }
             ]
         };
         Order? capturedOrder = null;

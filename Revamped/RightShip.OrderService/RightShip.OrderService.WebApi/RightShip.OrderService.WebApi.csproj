@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>bcf65a2f-d1c7-4402-bd0b-cf077aae9d47</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +20,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RightShip.OrderService.Application\RightShip.OrderService.Application.csproj" />
+    <ProjectReference Include="..\RightShip.OrderService.Domain\RightShip.OrderService.Domain.csproj" />
+    <ProjectReference Include="..\RightShip.OrderService.Infrastructure\RightShip.OrderService.Infrastructure.csproj" />
     <ProjectReference Include="..\RightShip.OrderService.Persistence.EfCore\RightShip.OrderService.Persistence.EfCore.csproj" />
     <ProjectReference Include="..\..\RightShip.Core\RightShip.Core.Persistence.EfCore\RightShip.Core.Persistence.EfCore.csproj" />
   </ItemGroup>
