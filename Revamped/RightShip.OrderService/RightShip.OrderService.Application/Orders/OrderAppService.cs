@@ -1,21 +1,25 @@
 using RightShip.Core.Application.Uow;
+using RightShip.OrderService.Application.Contracts.Integration;
 using RightShip.OrderService.Application.Contracts.Orders;
 using RightShip.OrderService.Domain.Entities;
+using RightShip.OrderService.Domain.Exceptions;
 using RightShip.OrderService.Domain.Repositories;
 
 namespace RightShip.OrderService.Application.Orders;
 
 /// <summary>
 /// Application service for order management.
-/// Coordinates domain objects and repositories via unit of work.
+/// Coordinates domain objects, repositories, and Product Service integration.
 /// </summary>
 public class OrderAppService : IOrderAppService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IProductServiceClient _productServiceClient;
 
-    public OrderAppService(IUnitOfWork unitOfWork)
+    public OrderAppService(IUnitOfWork unitOfWork, IProductServiceClient productServiceClient)
     {
         _unitOfWork = unitOfWork;
+        _productServiceClient = productServiceClient;
     }
 
     /// <inheritdoc />
@@ -31,9 +35,27 @@ public class OrderAppService : IOrderAppService
     /// <inheritdoc />
     public async Task<OrderDto> CreateOrderAsync(CreateOrderDto dto, Guid createdBy, CancellationToken cancellationToken = default)
     {
-        var lineData = (dto.Lines ?? [])
-            .Select(l => (l.ProductId, l.Quantity, l.UnitPrice));
+        var lines = dto.Lines ?? [];
+        if (lines.Count == 0)
+        {
+            throw new OrderLinesRequiredException();
+        }
 
+        // 1. Get prices and validate products exist
+        var lineData = new List<(Guid productId, int quantity, decimal unitPrice)>();
+        foreach (var line in lines)
+        {
+            var price = await _productServiceClient.GetProductPriceAsync(line.ProductId, cancellationToken);
+            lineData.Add((line.ProductId, line.Quantity, price));
+        }
+
+        // 2. Reserve stock (validates sufficient quantity)
+        foreach (var line in lines)
+        {
+            await _productServiceClient.ReserveStockAsync(line.ProductId, line.Quantity, cancellationToken);
+        }
+
+        // 3. Create and persist order
         var order = Order.Create(dto.CustomerId, lineData, createdBy);
 
         await _unitOfWork.StartAsync(cancellationToken);

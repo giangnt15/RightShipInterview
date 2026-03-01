@@ -1,9 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.Net.Client" Version="2.62.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.62.0" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.10" />
+    <ProjectReference Include="..\RightShip.OrderService.Application.Contracts\RightShip.OrderService.Application.Contracts.csproj" />
+    <ProjectReference Include="..\..\RightShip.ProductService\RightShip.ProductService.Application.Contracts\RightShip.ProductService.Application.Contracts.csproj" />
+  </ItemGroup>
 
 </Project>
