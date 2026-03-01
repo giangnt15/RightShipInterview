@@ -21,6 +21,12 @@ namespace RightShip.OrderService.WebApi
             builder.Services.AddOpenTelemetryObservability("RightShip.OrderService", builder.Configuration);
             builder.Services.AddOrderCreationRateLimiting(builder.Configuration);
 
+            var productServiceUrl = builder.Configuration["ProductService:Url"] ?? "http://localhost:5118";
+            builder.Services.AddHealthChecks()
+                .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: ["live"])
+                .AddTypeActivatedCheck<RightShip.Core.Persistence.EfCore.DatabaseHealthCheck<OrderDbContext>>("database", failureStatus: null, tags: ["ready"])
+                .AddUrlGroup(new Uri($"{productServiceUrl.TrimEnd('/')}/health/ready"), "ProductService", tags: ["ready"]);
+
             builder.Services.AddOrderPersistence(options =>
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=orders.db"));
             builder.Services.AddProductServiceClient(
@@ -46,6 +52,8 @@ namespace RightShip.OrderService.WebApi
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
+            app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = c => c.Tags.Contains("live") });
+            app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") });
 
             app.Run();
         }

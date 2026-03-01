@@ -40,6 +40,10 @@ namespace RightShip.ProductService.WebApi
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=products.db"));
             builder.Services.AddScoped<IProductAppService, ProductAppService>();
 
+            builder.Services.AddHealthChecks()
+                .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: ["live"])
+                .AddTypeActivatedCheck<RightShip.Core.Persistence.EfCore.DatabaseHealthCheck<ProductDbContext>>("database", failureStatus: null, tags: ["ready"]);
+
             builder.Services.AddControllers();
             builder.Services.AddGrpc();
             builder.Services.AddHostedService<ExpiredReservationReleaseService>();
@@ -61,6 +65,8 @@ namespace RightShip.ProductService.WebApi
 
             app.MapControllers();
             app.MapGrpcService<ProductGrpcService>();
+            app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = c => c.Tags.Contains("live") });
+            app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") });
 
             app.Run();
         }
