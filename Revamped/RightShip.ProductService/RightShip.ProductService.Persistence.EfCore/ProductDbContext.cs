@@ -52,7 +52,10 @@ public class ProductDbContext : BaseEfCoreDbContext
             b.Property(r => r.ExpiresAt);
             b.Property(r => r.CreatedAt);
             b.Property(r => r.Version).IsConcurrencyToken().ValueGeneratedNever();
-            b.HasIndex(r => new { r.ProductId, r.Status });
+            // Composite index for querying reservations by product, status, and expiration
+            // Including quantity for covering, eliminate additional primary key look ups
+            b.HasIndex(r => new { r.ProductId, r.Status, r.ExpiresAt, r.Quantity });
+            b.HasIndex(r => new { r.Status, r.ExpiresAt });
             b.HasIndex(r => r.ExpiresAt);
         });
     }
