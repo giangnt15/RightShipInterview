@@ -2,6 +2,7 @@ namespace RightShip.Core.Domain.Entities;
 
 /// <summary>
 /// The outbox message entity, used to store the messages to be sent to the message broker.
+/// This is saved to the database in the same transaction as the aggregate roots to ensure at least once delivery of messages.
 /// </summary>
 public class OutboxMessage : BaseEntity<long>
 {

@@ -1,9 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.62.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\RightShip.Core\RightShip.Core.Application\RightShip.Core.Application.csproj" />
+    <ProjectReference Include="..\RightShip.ProductService.Application.Contracts\RightShip.ProductService.Application.Contracts.csproj" />
+    <ProjectReference Include="..\RightShip.ProductService.Domain\RightShip.ProductService.Domain.csproj" />
+  </ItemGroup>
 
 </Project>

@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option csharp_namespace = "RightShip.ProductService.Application.Contracts.Grpc";
+
+package product;
+
+// Product service for internal service-to-service communication with Order Service.
+service ProductGrpc {
+  // Get product price by product id. Returns NOT_FOUND if product does not exist.
+  rpc GetProductPrice (GetProductPriceRequest) returns (GetProductPriceResponse);
+  // Reserve (decrease) stock. Returns INVALID_ARGUMENT if quantity invalid, FAILED_PRECONDITION if insufficient stock.
+  rpc ReserveStock (ReserveStockRequest) returns (ReserveStockResponse);
+}
+
+message GetProductPriceRequest {
+  string product_id = 1;
+}
+
+message GetProductPriceResponse {
+  string product_id = 1;
+  double price = 2;
+}
+
+message ReserveStockRequest {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message ReserveStockResponse {
+}

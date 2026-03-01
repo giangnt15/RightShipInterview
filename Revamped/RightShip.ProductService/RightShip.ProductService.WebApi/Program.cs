@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using RightShip.Core.Persistence.EfCore;
+using RightShip.ProductService.Application.Contracts.Products;
+using RightShip.ProductService.Application.Products;
+using RightShip.ProductService.Persistence.EfCore;
 
 namespace RightShip.ProductService.WebApi
 {
@@ -7,28 +12,28 @@ namespace RightShip.ProductService.WebApi
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            builder.Services.AddProductPersistence(options =>
+                options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=products.db"));
+            builder.Services.AddScoped<IProductAppService, ProductAppService>();
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddGrpc();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.EnsureMigrateDb<ProductDbContext, ProductDbContextFactory>();
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
 
-
             app.MapControllers();
+            app.MapGrpcService<ProductGrpcService>();
 
             app.Run();
         }

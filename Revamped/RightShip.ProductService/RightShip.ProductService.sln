@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.ProductService.In
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.ProductService.Persistence.EfCore", "RightShip.ProductService.Persistence.EfCore\RightShip.ProductService.Persistence.EfCore.csproj", "{87390C9E-8A24-4335-9C92-8CB5F85F0BAA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.ProductService.UnitTest", "RightShip.ProductService.UnitTest\RightShip.ProductService.UnitTest.csproj", "{D03588DA-40AB-4B4C-AA2E-516B77AF8F05}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{87390C9E-8A24-4335-9C92-8CB5F85F0BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87390C9E-8A24-4335-9C92-8CB5F85F0BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87390C9E-8A24-4335-9C92-8CB5F85F0BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D03588DA-40AB-4B4C-AA2E-516B77AF8F05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D03588DA-40AB-4B4C-AA2E-516B77AF8F05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D03588DA-40AB-4B4C-AA2E-516B77AF8F05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D03588DA-40AB-4B4C-AA2E-516B77AF8F05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

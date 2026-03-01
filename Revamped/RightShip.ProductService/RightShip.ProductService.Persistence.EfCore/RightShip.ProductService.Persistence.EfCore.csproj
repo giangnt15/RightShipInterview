@@ -1,9 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />
+    <ProjectReference Include="..\RightShip.ProductService.Domain\RightShip.ProductService.Domain.csproj" />
+    <ProjectReference Include="..\..\RightShip.Core\RightShip.Core.Persistence.EfCore\RightShip.Core.Persistence.EfCore.csproj" />
+  </ItemGroup>
 
 </Project>
