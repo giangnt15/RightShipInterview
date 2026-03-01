@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using RightShip.Core.Observability;
 using RightShip.Core.Persistence.EfCore;
 using RightShip.ProductService.Application.Contracts.Products;
 using RightShip.ProductService.Application.Products;
@@ -19,6 +20,7 @@ namespace RightShip.ProductService.WebApi
 
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
+            builder.Services.AddOpenTelemetryObservability("RightShip.ProductService", builder.Configuration);
 
             // Enable HTTP/2 on HTTP endpoints for gRPC
             builder.WebHost.ConfigureKestrel(options =>
@@ -52,6 +54,7 @@ namespace RightShip.ProductService.WebApi
                 app.UseSwaggerUI();
             }
             app.EnsureMigrateDb<ProductDbContext, ProductDbContextFactory>();
+            app.UseTraceIdResponseHeader();
             app.UseExceptionHandler();
             app.UseHttpsRedirection();
             app.UseAuthorization();

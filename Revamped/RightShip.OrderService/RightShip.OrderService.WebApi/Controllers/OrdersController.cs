@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using RightShip.OrderService.Application.Contracts.Orders;
 
@@ -17,6 +18,10 @@ public class OrdersController : ControllerBase
     {
         _orderAppService = orderAppService;
     }
+
+    [HttpGet("trace-test")]
+    public IActionResult TraceTest() =>
+        Ok(new { traceId = Activity.Current?.TraceId.ToString() ?? "none" });
 
     /// <summary>
     /// Get order by id.

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RightShip.Core.Observability;
 using RightShip.Core.Persistence.EfCore;
 using RightShip.OrderService.Application.Contracts.Orders;
 using RightShip.OrderService.Application.Orders;
@@ -16,6 +17,7 @@ namespace RightShip.OrderService.WebApi
 
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
+            builder.Services.AddOpenTelemetryObservability("RightShip.OrderService", builder.Configuration);
 
             builder.Services.AddOrderPersistence(options =>
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=orders.db"));
@@ -36,6 +38,7 @@ namespace RightShip.OrderService.WebApi
             }
 
             app.EnsureMigrateDb<OrderDbContext, OrderDbContextFactory>();
+            app.UseTraceIdResponseHeader();
             app.UseExceptionHandler();
             app.UseHttpsRedirection();
             app.UseAuthorization();

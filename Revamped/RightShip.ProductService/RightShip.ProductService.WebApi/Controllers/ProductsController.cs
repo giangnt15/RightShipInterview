@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using RightShip.ProductService.Application.Contracts.Products;
 
@@ -16,6 +17,10 @@ public class ProductsController : ControllerBase
     {
         _productAppService = productAppService;
     }
+
+    [HttpGet("trace-test")]
+    public IActionResult TraceTest() =>
+        Ok(new { traceId = Activity.Current?.TraceId.ToString() ?? "none" });
 
     /// <summary>
     /// Get product by id.
