@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RightShip.Core.Persistence.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RightShip.Core.Application", "RightShip.Core.Application\RightShip.Core.Application.csproj", "{FAA5D95A-BFE1-4F8B-91C8-8E9E61BED85D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RightShip.Core.Observability", "RightShip.Core.Observability\RightShip.Core.Observability.csproj", "{F657C842-EE13-4069-8DB8-1965585F7B9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{FAA5D95A-BFE1-4F8B-91C8-8E9E61BED85D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FAA5D95A-BFE1-4F8B-91C8-8E9E61BED85D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FAA5D95A-BFE1-4F8B-91C8-8E9E61BED85D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F657C842-EE13-4069-8DB8-1965585F7B9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F657C842-EE13-4069-8DB8-1965585F7B9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F657C842-EE13-4069-8DB8-1965585F7B9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F657C842-EE13-4069-8DB8-1965585F7B9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

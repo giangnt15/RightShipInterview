@@ -23,6 +23,7 @@
     <ProjectReference Include="..\RightShip.OrderService.Domain\RightShip.OrderService.Domain.csproj" />
     <ProjectReference Include="..\RightShip.OrderService.Infrastructure\RightShip.OrderService.Infrastructure.csproj" />
     <ProjectReference Include="..\RightShip.OrderService.Persistence.EfCore\RightShip.OrderService.Persistence.EfCore.csproj" />
+    <ProjectReference Include="..\..\RightShip.Core\RightShip.Core.Observability\RightShip.Core.Observability.csproj" />
     <ProjectReference Include="..\..\RightShip.Core\RightShip.Core.Persistence.EfCore\RightShip.Core.Persistence.EfCore.csproj" />
   </ItemGroup>
 

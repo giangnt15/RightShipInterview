@@ -24,6 +24,7 @@
     <ProjectReference Include="..\RightShip.ProductService.Application.Contracts\RightShip.ProductService.Application.Contracts.csproj" />
     <ProjectReference Include="..\RightShip.ProductService.Domain\RightShip.ProductService.Domain.csproj" />
     <ProjectReference Include="..\RightShip.ProductService.Persistence.EfCore\RightShip.ProductService.Persistence.EfCore.csproj" />
+    <ProjectReference Include="..\..\RightShip.Core\RightShip.Core.Observability\RightShip.Core.Observability.csproj" />
     <ProjectReference Include="..\..\RightShip.Core\RightShip.Core.Persistence.EfCore\RightShip.Core.Persistence.EfCore.csproj" />
   </ItemGroup>
 
