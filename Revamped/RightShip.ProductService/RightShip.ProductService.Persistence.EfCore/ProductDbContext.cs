@@ -15,6 +15,7 @@ public class ProductDbContext : BaseEfCoreDbContext
     }
 
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<ProductReservation> ProductReservations => Set<ProductReservation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,6 +40,20 @@ public class ProductDbContext : BaseEfCoreDbContext
                 q.Property(x => x.Value).HasColumnName("QuantityValue");
             });
             b.HasIndex(p => p.Name);
+        });
+
+        modelBuilder.Entity<ProductReservation>(b =>
+        {
+            b.ToTable("ProductReservations");
+            b.HasKey(r => r.Id);
+            b.Property(r => r.ProductId);
+            b.Property(r => r.Quantity);
+            b.Property(r => r.Status);
+            b.Property(r => r.ExpiresAt);
+            b.Property(r => r.CreatedAt);
+            b.Property(r => r.Version).IsConcurrencyToken().ValueGeneratedNever();
+            b.HasIndex(r => new { r.ProductId, r.Status });
+            b.HasIndex(r => r.ExpiresAt);
         });
     }
 }

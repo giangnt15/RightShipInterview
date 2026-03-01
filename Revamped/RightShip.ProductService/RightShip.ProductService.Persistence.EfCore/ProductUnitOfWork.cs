@@ -17,14 +17,21 @@ public class ProductUnitOfWork : EfCoreUow<ProductDbContext, ProductDbContextFac
     /// <inheritdoc />
     public override TRepository GetRepository<TRepository>()
     {
+        if (_dbContext == null)
+        {
+            throw new InvalidOperationException("Unit of work not started");
+        }
+
         if (typeof(TRepository) == typeof(IProductRepository))
         {
-            if (_dbContext == null)
-            {
-                throw new InvalidOperationException("Unit of work not started");
-            }
             return (TRepository)(object)new ProductRepository(_dbContext);
         }
+
+        if (typeof(TRepository) == typeof(IProductReservationRepository))
+        {
+            return (TRepository)(object)new ProductReservationRepository(_dbContext);
+        }
+
         return base.GetRepository<TRepository>();
     }
 }

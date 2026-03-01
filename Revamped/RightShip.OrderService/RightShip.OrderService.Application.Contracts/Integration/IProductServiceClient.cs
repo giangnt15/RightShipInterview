@@ -12,9 +12,20 @@ public interface IProductServiceClient
     Task<decimal> GetProductPriceAsync(Guid productId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Reserve (decrease) stock for a product.
+    /// Create a time-limited reservation. Does not deduct quantity until <see cref="ConfirmReservationsAsync"/>.
     /// </summary>
+    /// <param name="productId">Product id.</param>
+    /// <param name="quantity">Quantity to reserve.</param>
+    /// <param name="ttlSeconds">TTL in seconds; default 300 if null.</param>
+    /// <returns>Reservation id to pass to ConfirmReservationsAsync.</returns>
     /// <exception cref="ProductNotFoundException">Product not found.</exception>
-    /// <exception cref="InsufficientStockException">Insufficient stock.</exception>
-    Task ReserveStockAsync(Guid productId, int quantity, CancellationToken cancellationToken = default);
+    /// <exception cref="InsufficientStockException">Insufficient available stock.</exception>
+    Task<Guid> CreateReservationAsync(Guid productId, int quantity, int? ttlSeconds = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Confirm reservations; deducts product quantity. Call after Order Service commits.
+    /// </summary>
+    /// <param name="reservationIds">Reservation ids from CreateReservationAsync.</param>
+    /// <exception cref="ProductNotFoundException">Reservation or product not found.</exception>
+    Task ConfirmReservationsAsync(IReadOnlyList<Guid> reservationIds, CancellationToken cancellationToken = default);
 }

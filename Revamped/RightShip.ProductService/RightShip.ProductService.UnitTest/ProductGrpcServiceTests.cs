@@ -1,12 +1,14 @@
 using Grpc.Core;
 using Grpc.Core.Testing;
+using Microsoft.Extensions.Options;
 using RightShip.Core.Application.Uow;
 using RightShip.Core.Domain.ValueObjects;
 using Moq;
 using RightShip.ProductService.Application.Contracts.Grpc;
+using RightShip.ProductService.Application.Options;
 using RightShip.ProductService.Domain.Entities;
-using RightShip.ProductService.Domain.Exceptions;
 using RightShip.ProductService.Domain.Repositories;
+using RightShip.ProductService.Domain.Services;
 using RightShip.ProductService.Domain.Shared.ValueObjects;
 using RightShip.ProductService.Application.Products;
 
@@ -16,6 +18,7 @@ public class ProductGrpcServiceTests
 {
     private Mock<IUnitOfWork> _unitOfWorkMock = null!;
     private Mock<IProductRepository> _productRepositoryMock = null!;
+    private Mock<IProductReservationRepository> _reservationRepositoryMock = null!;
     private ProductGrpcService _sut = null!;
     private ServerCallContext _context = null!;
 
@@ -24,6 +27,7 @@ public class ProductGrpcServiceTests
     {
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productRepositoryMock = new Mock<IProductRepository>();
+        _reservationRepositoryMock = new Mock<IProductReservationRepository>();
         _unitOfWorkMock
             .Setup(x => x.StartAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -33,6 +37,9 @@ public class ProductGrpcServiceTests
         _unitOfWorkMock
             .Setup(x => x.GetRepository<IProductRepository>())
             .Returns(_productRepositoryMock.Object);
+        _unitOfWorkMock
+            .Setup(x => x.GetRepository<IProductReservationRepository>())
+            .Returns(_reservationRepositoryMock.Object);
 
         _context = TestServerCallContext.Create(
             "Test",
@@ -47,7 +54,9 @@ public class ProductGrpcServiceTests
             () => new WriteOptions(),
             _ => { });
 
-        _sut = new ProductGrpcService(_unitOfWorkMock.Object);
+        var reservationOptions = Options.Create(new ReservationOptions { DefaultTtlSeconds = 300 });
+        var confirmationService = new ReservationConfirmationService();
+        _sut = new ProductGrpcService(_unitOfWorkMock.Object, reservationOptions, confirmationService);
     }
 
     [Test]
@@ -99,7 +108,7 @@ public class ProductGrpcServiceTests
     }
 
     [Test]
-    public async Task ReserveStock_WhenValid_CommitsAndReturns()
+    public async Task CreateReservation_WhenValid_ReturnsReservationIdAndExpiresAt()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -107,86 +116,123 @@ public class ProductGrpcServiceTests
         _productRepositoryMock
             .Setup(x => x.LoadAsync(id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(product);
-        _productRepositoryMock
-            .Setup(x => x.UpdateAsync(It.IsAny<Product>(), id))
-            .ReturnsAsync(product);
+        _reservationRepositoryMock
+            .Setup(x => x.GetTotalPendingQuantityForProductAsync(id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(0);
+        ProductReservation? captured = null;
+        _reservationRepositoryMock
+            .Setup(x => x.AddAsync(It.IsAny<ProductReservation>()))
+            .Callback<ProductReservation>(r => captured = r)
+            .ReturnsAsync((ProductReservation r) => r);
 
-        var request = new ReserveStockRequest { ProductId = id.ToString(), Quantity = 5 };
+        var request = new CreateReservationRequest { ProductId = id.ToString(), Quantity = 5 };
 
         // Act
-        var result = await _sut.ReserveStock(request, _context);
+        var result = await _sut.CreateReservation(request, _context);
 
         // Assert
-        Assert.That(result, Is.Not.Null);
-        Assert.That(product.Quantity.Value, Is.EqualTo(15));
+        Assert.That(result.ReservationId, Is.Not.Empty);
+        Assert.That(result.ExpiresAt, Is.Not.Empty);
+        Assert.That(captured, Is.Not.Null);
+        Assert.That(captured!.Quantity, Is.EqualTo(5));
+        Assert.That(captured.ProductId, Is.EqualTo(id));
         _unitOfWorkMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
-    public void ReserveStock_WhenQuantityZero_ThrowsRpcExceptionInvalidArgument()
+    public void CreateReservation_WhenQuantityZero_ThrowsRpcExceptionInvalidArgument()
     {
-        // Arrange
-        var request = new ReserveStockRequest { ProductId = Guid.NewGuid().ToString(), Quantity = 0 };
+        var request = new CreateReservationRequest { ProductId = Guid.NewGuid().ToString(), Quantity = 0 };
 
-        // Act & Assert
-        var ex = Assert.ThrowsAsync<RpcException>(() => _sut.ReserveStock(request, _context));
+        var ex = Assert.ThrowsAsync<RpcException>(() => _sut.CreateReservation(request, _context));
         Assert.That(ex.Status.StatusCode, Is.EqualTo(StatusCode.InvalidArgument));
         Assert.That(ex.Status.Detail, Does.Contain("positive"));
     }
 
     [Test]
-    public void ReserveStock_WhenQuantityNegative_ThrowsRpcExceptionInvalidArgument()
+    public void CreateReservation_WhenQuantityNegative_ThrowsRpcExceptionInvalidArgument()
     {
-        // Arrange
-        var request = new ReserveStockRequest { ProductId = Guid.NewGuid().ToString(), Quantity = -1 };
+        var request = new CreateReservationRequest { ProductId = Guid.NewGuid().ToString(), Quantity = -1 };
 
-        // Act & Assert
-        var ex = Assert.ThrowsAsync<RpcException>(() => _sut.ReserveStock(request, _context));
+        var ex = Assert.ThrowsAsync<RpcException>(() => _sut.CreateReservation(request, _context));
         Assert.That(ex.Status.StatusCode, Is.EqualTo(StatusCode.InvalidArgument));
     }
 
     [Test]
-    public void ReserveStock_WhenInvalidProductId_ThrowsRpcExceptionInvalidArgument()
+    public void CreateReservation_WhenInvalidProductId_ThrowsRpcExceptionInvalidArgument()
     {
-        // Arrange
-        var request = new ReserveStockRequest { ProductId = "invalid", Quantity = 5 };
+        var request = new CreateReservationRequest { ProductId = "invalid", Quantity = 5 };
 
-        // Act & Assert
-        var ex = Assert.ThrowsAsync<RpcException>(() => _sut.ReserveStock(request, _context));
+        var ex = Assert.ThrowsAsync<RpcException>(() => _sut.CreateReservation(request, _context));
         Assert.That(ex.Status.StatusCode, Is.EqualTo(StatusCode.InvalidArgument));
     }
 
     [Test]
-    public void ReserveStock_WhenInsufficientStock_ThrowsRpcExceptionFailedPrecondition()
+    public void CreateReservation_WhenInsufficientAvailableStock_ThrowsRpcExceptionFailedPrecondition()
     {
-        // Arrange
         var id = Guid.NewGuid();
-        var product = Product.Create("Test", new Money { Amount = 10m }, new ProductQuantity(2), Guid.NewGuid());
+        var product = Product.Create("Test", new Money { Amount = 10m }, new ProductQuantity(20), Guid.NewGuid());
         _productRepositoryMock
             .Setup(x => x.LoadAsync(id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(product);
+        _reservationRepositoryMock
+            .Setup(x => x.GetTotalPendingQuantityForProductAsync(id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(18); // 20 - 18 = 2 available
 
-        var request = new ReserveStockRequest { ProductId = id.ToString(), Quantity = 5 };
+        var request = new CreateReservationRequest { ProductId = id.ToString(), Quantity = 5 };
 
-        // Act & Assert
-        var ex = Assert.ThrowsAsync<RpcException>(() => _sut.ReserveStock(request, _context));
+        var ex = Assert.ThrowsAsync<RpcException>(() => _sut.CreateReservation(request, _context));
         Assert.That(ex.Status.StatusCode, Is.EqualTo(StatusCode.FailedPrecondition));
-        Assert.That(ex.Status.Detail, Does.Contain("Insufficient stock"));
+        Assert.That(ex.Status.Detail, Does.Contain("Insufficient"));
     }
 
     [Test]
-    public void ReserveStock_WhenProductNotFound_ThrowsRpcExceptionNotFound()
+    public void CreateReservation_WhenProductNotFound_ThrowsRpcExceptionNotFound()
     {
-        // Arrange
         var id = Guid.NewGuid();
         _productRepositoryMock
             .Setup(x => x.LoadAsync(id, It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Not found"));
 
-        var request = new ReserveStockRequest { ProductId = id.ToString(), Quantity = 5 };
+        var request = new CreateReservationRequest { ProductId = id.ToString(), Quantity = 5 };
 
-        // Act & Assert
-        var ex = Assert.ThrowsAsync<RpcException>(() => _sut.ReserveStock(request, _context));
+        var ex = Assert.ThrowsAsync<RpcException>(() => _sut.CreateReservation(request, _context));
         Assert.That(ex.Status.StatusCode, Is.EqualTo(StatusCode.NotFound));
+    }
+
+    [Test]
+    public async Task ConfirmReservations_WhenValid_DeductsQuantity()
+    {
+        var productId = Guid.NewGuid();
+        var product = Product.Create("P", new Money { Amount = 10m }, new ProductQuantity(20), Guid.NewGuid());
+        var reservation = ProductReservation.Create(productId, 5, TimeSpan.FromMinutes(5));
+
+        _reservationRepositoryMock
+            .Setup(x => x.LoadAsync(reservation.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(reservation);
+        _productRepositoryMock
+            .Setup(x => x.LoadAsync(productId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(product);
+        _reservationRepositoryMock
+            .Setup(x => x.UpdateAsync(It.IsAny<ProductReservation>(), reservation.Id))
+            .ReturnsAsync(reservation);
+        _productRepositoryMock
+            .Setup(x => x.UpdateAsync(It.IsAny<Product>(), productId))
+            .ReturnsAsync(product);
+
+        var request = new ConfirmReservationsRequest { ReservationIds = { reservation.Id.ToString() } };
+
+        await _sut.ConfirmReservations(request, _context);
+
+        Assert.That(product.Quantity.Value, Is.EqualTo(15));
+        _unitOfWorkMock.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public void ConfirmReservations_WhenEmpty_ReturnsSuccessfully()
+    {
+        var request = new ConfirmReservationsRequest();
+
+        Assert.DoesNotThrowAsync(() => _sut.ConfirmReservations(request, _context));
     }
 }

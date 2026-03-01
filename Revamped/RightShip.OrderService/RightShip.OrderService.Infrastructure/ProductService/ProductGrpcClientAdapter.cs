@@ -32,16 +32,21 @@ public class ProductGrpcClientAdapter : IProductServiceClient
     }
 
     /// <inheritdoc />
-    public async Task ReserveStockAsync(Guid productId, int quantity, CancellationToken cancellationToken = default)
+    public async Task<Guid> CreateReservationAsync(Guid productId, int quantity, int? ttlSeconds = null, CancellationToken cancellationToken = default)
     {
-        var request = new ReserveStockRequest
+        var request = new CreateReservationRequest
         {
             ProductId = productId.ToString(),
             Quantity = quantity
         };
+        if (ttlSeconds.HasValue && ttlSeconds.Value > 0)
+        {
+            request.TtlSeconds = ttlSeconds.Value;
+        }
         try
         {
-            await _client.ReserveStockAsync(request, cancellationToken: cancellationToken);
+            var response = await _client.CreateReservationAsync(request, cancellationToken: cancellationToken);
+            return Guid.Parse(response.ReservationId);
         }
         catch (Grpc.Core.RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.NotFound)
         {
@@ -51,5 +56,20 @@ public class ProductGrpcClientAdapter : IProductServiceClient
         {
             throw new InsufficientStockException(productId, quantity);
         }
+    }
+
+    /// <inheritdoc />
+    public async Task ConfirmReservationsAsync(IReadOnlyList<Guid> reservationIds, CancellationToken cancellationToken = default)
+    {
+        if (reservationIds.Count == 0)
+        {
+            return;
+        }
+        var request = new ConfirmReservationsRequest();
+        foreach (var id in reservationIds)
+        {
+            request.ReservationIds.Add(id.ToString());
+        }
+        await _client.ConfirmReservationsAsync(request, cancellationToken: cancellationToken);
     }
 }

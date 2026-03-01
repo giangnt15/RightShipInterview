@@ -7,5 +7,13 @@ namespace RightShip.ProductService.Domain.Exceptions;
 /// </summary>
 public class ProductDomainException : DomainException
 {
+    public ProductDomainException()
+    {
+    }
+
+    public ProductDomainException(string? message)
+        : base(message)
+    {
+    }
 }
 
