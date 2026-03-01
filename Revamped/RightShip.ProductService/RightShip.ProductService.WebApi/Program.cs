@@ -4,6 +4,9 @@ using RightShip.Core.Persistence.EfCore;
 using RightShip.ProductService.Application.Contracts.Products;
 using RightShip.ProductService.Application.Products;
 using RightShip.ProductService.Persistence.EfCore;
+using RightShip.ProductService.Application.Options;
+using RightShip.ProductService.Domain;
+using RightShip.ProductService.WebApi.HostedServices;
 using RightShip.ProductService.WebApi.Middleware;
 
 namespace RightShip.ProductService.WebApi
@@ -26,12 +29,18 @@ namespace RightShip.ProductService.WebApi
                 });
             });
 
+            builder.Services.Configure<ReservationOptions>(
+                builder.Configuration.GetSection(ReservationOptions.SectionName));
+
+            builder.Services.AddProductDomainServices();
+
             builder.Services.AddProductPersistence(options =>
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=products.db"));
             builder.Services.AddScoped<IProductAppService, ProductAppService>();
 
             builder.Services.AddControllers();
             builder.Services.AddGrpc();
+            builder.Services.AddHostedService<ExpiredReservationReleaseService>();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 

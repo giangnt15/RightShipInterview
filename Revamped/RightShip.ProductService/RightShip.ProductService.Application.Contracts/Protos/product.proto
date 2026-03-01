@@ -8,8 +8,12 @@ package product;
 service ProductGrpc {
   // Get product price by product id. Returns NOT_FOUND if product does not exist.
   rpc GetProductPrice (GetProductPriceRequest) returns (GetProductPriceResponse);
-  // Reserve (decrease) stock. Returns INVALID_ARGUMENT if quantity invalid, FAILED_PRECONDITION if insufficient stock.
-  rpc ReserveStock (ReserveStockRequest) returns (ReserveStockResponse);
+  // Create a time-limited reservation. Does not deduct quantity until ConfirmReservations.
+  // Returns NOT_FOUND if product missing, FAILED_PRECONDITION if insufficient available stock.
+  rpc CreateReservation (CreateReservationRequest) returns (CreateReservationResponse);
+  // Confirm reservations; deducts product quantity. Call after Order Service commits.
+  // Returns NOT_FOUND if reservation missing, FAILED_PRECONDITION if expired/already confirmed.
+  rpc ConfirmReservations (ConfirmReservationsRequest) returns (ConfirmReservationsResponse);
 }
 
 message GetProductPriceRequest {
@@ -21,10 +25,21 @@ message GetProductPriceResponse {
   double price = 2;
 }
 
-message ReserveStockRequest {
+message CreateReservationRequest {
   string product_id = 1;
   int32 quantity = 2;
+  // TTL in seconds; default 300 (5 min) if omitted.
+  int32 ttl_seconds = 3;
 }
 
-message ReserveStockResponse {
+message CreateReservationResponse {
+  string reservation_id = 1;
+  string expires_at = 2; // ISO 8601
+}
+
+message ConfirmReservationsRequest {
+  repeated string reservation_ids = 1;
+}
+
+message ConfirmReservationsResponse {
 }

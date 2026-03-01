@@ -49,10 +49,12 @@ public class OrderAppService : IOrderAppService
             lineData.Add((line.ProductId, line.Quantity, price));
         }
 
-        // 2. Reserve stock (validates sufficient quantity)
+        // 2. Create time-limited reservations (does not deduct; validates sufficient available stock)
+        var reservationIds = new List<Guid>();
         foreach (var line in lines)
         {
-            await _productServiceClient.ReserveStockAsync(line.ProductId, line.Quantity, cancellationToken);
+            var reservationId = await _productServiceClient.CreateReservationAsync(line.ProductId, line.Quantity, ttlSeconds: 300, cancellationToken);
+            reservationIds.Add(reservationId);
         }
 
         // 3. Create and persist order
@@ -62,6 +64,9 @@ public class OrderAppService : IOrderAppService
         var repo = _unitOfWork.GetRepository<IOrderRepository>();
         var added = await repo.AddAsync(order);
         await _unitOfWork.CommitAsync(cancellationToken);
+
+        // 4. Confirm reservations (deduct quantity). If commit failed, we would never reach here; reservations expire.
+        await _productServiceClient.ConfirmReservationsAsync(reservationIds, cancellationToken);
 
         return MapToDto(added);
     }

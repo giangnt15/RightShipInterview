@@ -35,7 +35,10 @@ public class OrderAppServiceTests
             .Setup(x => x.GetProductPriceAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Guid id, CancellationToken _) => id.GetHashCode() % 100 == 0 ? 10m : 5m);
         _productServiceClientMock
-            .Setup(x => x.ReserveStockAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateReservationAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Guid _, int _, int? _, CancellationToken _) => Guid.NewGuid());
+        _productServiceClientMock
+            .Setup(x => x.ConfirmReservationsAsync(It.IsAny<IReadOnlyList<Guid>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         _sut = new OrderAppService(_unitOfWorkMock.Object, _productServiceClientMock.Object);
