@@ -1,6 +1,6 @@
 using Grpc.Net.Client;
 using RightShip.OrderService.Application.Contracts.Integration;
-using RightShip.ProductService.Application.Contracts.Grpc;
+using RightShip.OrderService.Infrastructure.ProductService.Grpc;
 
 namespace RightShip.OrderService.Infrastructure.ProductService;
 
@@ -25,7 +25,7 @@ public class ProductGrpcClientAdapter : IProductServiceClient
             var response = await _client.GetProductPriceAsync(request, cancellationToken: cancellationToken);
             return (decimal)response.Price;
         }
-        catch (Grpc.Core.RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.NotFound)
+        catch (global::Grpc.Core.RpcException ex) when (ex.StatusCode == global::Grpc.Core.StatusCode.NotFound)
         {
             throw new ProductNotFoundException(productId);
         }
@@ -48,11 +48,11 @@ public class ProductGrpcClientAdapter : IProductServiceClient
             var response = await _client.CreateReservationAsync(request, cancellationToken: cancellationToken);
             return Guid.Parse(response.ReservationId);
         }
-        catch (Grpc.Core.RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.NotFound)
+        catch (global::Grpc.Core.RpcException ex) when (ex.StatusCode == global::Grpc.Core.StatusCode.NotFound)
         {
             throw new ProductNotFoundException(productId);
         }
-        catch (Grpc.Core.RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.FailedPrecondition)
+        catch (global::Grpc.Core.RpcException ex) when (ex.StatusCode == global::Grpc.Core.StatusCode.FailedPrecondition)
         {
             throw new InsufficientStockException(productId, quantity);
         }

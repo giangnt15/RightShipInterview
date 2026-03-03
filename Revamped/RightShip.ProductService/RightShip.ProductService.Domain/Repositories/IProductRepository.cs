@@ -9,6 +9,11 @@ namespace RightShip.ProductService.Domain.Repositories;
 public interface IProductRepository : IRepository<Product, Guid>
 {
     /// <summary>
+    /// Load multiple products by ids. Throws if any id is not found.
+    /// </summary>
+    Task<IReadOnlyList<Product>> LoadManyAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Get paged list of products with filters.
     /// </summary>
     Task<(IReadOnlyList<Product> Items, int TotalCount)> GetListAsync(
