@@ -53,6 +53,23 @@ public class ProductRepository : IProductRepository
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Product>> LoadManyAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.Distinct().ToList();
+        if (idList.Count == 0)
+        {
+            return [];
+        }
+        var products = await _context.Products
+            .Where(p => idList.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+        var byId = products.ToDictionary(p => p.Id);
+        return idList.Select(id => byId.TryGetValue(id, out var p)
+            ? p
+            : throw new InvalidOperationException($"Product with id '{id}' was not found.")).ToList();
+    }
+
+    /// <inheritdoc />
     public async Task<(IReadOnlyList<Product> Items, int TotalCount)> GetListAsync(
         string? searchName,
         int pageNumber,

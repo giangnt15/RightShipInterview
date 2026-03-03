@@ -19,4 +19,9 @@ public interface IProductReservationRepository : IRepository<ProductReservation,
     /// Used by background job to release expired reservations.
     /// </summary>
     Task<IReadOnlyList<ProductReservation>> GetExpiredPendingReservationsAsync(int maxCount, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Load multiple reservations by ids. Throws if any id is not found.
+    /// </summary>
+    Task<IReadOnlyList<ProductReservation>> LoadManyAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
 }

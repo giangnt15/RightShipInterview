@@ -77,7 +77,7 @@ public class OrderAppServiceTests
         var id = Guid.NewGuid();
         _orderRepositoryMock
             .Setup(x => x.LoadAsync(id, It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new InvalidOperationException("Not found"));
+            .ReturnsAsync((Order?)null!);
 
         // Act
         var result = await _sut.GetByIdAsync(id);

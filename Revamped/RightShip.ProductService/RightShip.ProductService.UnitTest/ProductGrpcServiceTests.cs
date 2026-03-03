@@ -203,21 +203,20 @@ public class ProductGrpcServiceTests
     [Test]
     public async Task ConfirmReservations_WhenValid_DeductsQuantity()
     {
-        var productId = Guid.NewGuid();
         var product = Product.Create("P", new Money { Amount = 10m }, new ProductQuantity(20), Guid.NewGuid());
-        var reservation = ProductReservation.Create(productId, 5, TimeSpan.FromMinutes(5));
+        var reservation = ProductReservation.Create(product.Id, 5, TimeSpan.FromMinutes(5));
 
         _reservationRepositoryMock
-            .Setup(x => x.LoadAsync(reservation.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(reservation);
+            .Setup(x => x.LoadManyAsync(It.Is<IEnumerable<Guid>>(ids => ids.Contains(reservation.Id)), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[] { reservation });
         _productRepositoryMock
-            .Setup(x => x.LoadAsync(productId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(product);
+            .Setup(x => x.LoadManyAsync(It.Is<IEnumerable<Guid>>(ids => ids.Contains(product.Id)), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new[] { product });
         _reservationRepositoryMock
             .Setup(x => x.UpdateAsync(It.IsAny<ProductReservation>(), reservation.Id))
             .ReturnsAsync(reservation);
         _productRepositoryMock
-            .Setup(x => x.UpdateAsync(It.IsAny<Product>(), productId))
+            .Setup(x => x.UpdateAsync(It.IsAny<Product>(), product.Id))
             .ReturnsAsync(product);
 
         var request = new ConfirmReservationsRequest { ReservationIds = { reservation.Id.ToString() } };

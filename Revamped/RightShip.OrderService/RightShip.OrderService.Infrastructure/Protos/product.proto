@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option csharp_namespace = "RightShip.OrderService.Infrastructure.ProductService.Grpc";
+
+package product;
+
+service ProductGrpc {
+  rpc GetProductPrice (GetProductPriceRequest) returns (GetProductPriceResponse);
+  rpc CreateReservation (CreateReservationRequest) returns (CreateReservationResponse);
+  rpc ConfirmReservations (ConfirmReservationsRequest) returns (ConfirmReservationsResponse);
+}
+
+message GetProductPriceRequest {
+  string product_id = 1;
+}
+
+message GetProductPriceResponse {
+  string product_id = 1;
+  double price = 2;
+}
+
+message CreateReservationRequest {
+  string product_id = 1;
+  int32 quantity = 2;
+  int32 ttl_seconds = 3;
+}
+
+message CreateReservationResponse {
+  string reservation_id = 1;
+  string expires_at = 2;
+}
+
+message ConfirmReservationsRequest {
+  repeated string reservation_ids = 1;
+}
+
+message ConfirmReservationsResponse {
+}

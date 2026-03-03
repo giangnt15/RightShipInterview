@@ -137,12 +137,16 @@ public class ProductGrpcService : ProductGrpc.ProductGrpcBase
             var reservationRepo = _unitOfWork.GetRepository<IProductReservationRepository>();
             var productRepo = _unitOfWork.GetRepository<IProductRepository>();
 
-            foreach (var id in ids)
+            var reservations = await reservationRepo.LoadManyAsync(ids, context.CancellationToken);
+            var productIds = reservations.Select(r => r.ProductId).Distinct().ToList();
+            var products = await productRepo.LoadManyAsync(productIds, context.CancellationToken);
+            var productById = products.ToDictionary(p => p.Id);
+
+            foreach (var reservation in reservations)
             {
-                var reservation = await reservationRepo.LoadAsync(id, context.CancellationToken);
-                var product = await productRepo.LoadAsync(reservation.ProductId, context.CancellationToken);
+                var product = productById[reservation.ProductId];
                 _reservationConfirmationService.ConfirmReservation(reservation, product);
-                await reservationRepo.UpdateAsync(reservation, id);
+                await reservationRepo.UpdateAsync(reservation, reservation.Id);
                 await productRepo.UpdateAsync(product, product.Id);
             }
 

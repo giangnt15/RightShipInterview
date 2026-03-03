@@ -6,7 +6,7 @@ using Polly.Extensions.Http;
 using Polly.Retry;
 using Polly.Timeout;
 using RightShip.OrderService.Application.Contracts.Integration;
-using RightShip.ProductService.Application.Contracts.Grpc;
+using RightShip.OrderService.Infrastructure.ProductService.Grpc;
 
 namespace RightShip.OrderService.Infrastructure.ProductService;
 

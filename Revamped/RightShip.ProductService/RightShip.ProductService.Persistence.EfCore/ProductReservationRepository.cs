@@ -72,4 +72,21 @@ public class ProductReservationRepository : IProductReservationRepository
             .Take(maxCount)
             .ToListAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ProductReservation>> LoadManyAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.ToList();
+        if (idList.Count == 0)
+        {
+            return [];
+        }
+        var reservations = await _context.ProductReservations
+            .Where(r => idList.Contains(r.Id))
+            .ToListAsync(cancellationToken);
+        var byId = reservations.ToDictionary(r => r.Id);
+        return idList.Select(id => byId.TryGetValue(id, out var r)
+            ? r
+            : throw new InvalidOperationException($"Reservation '{id}' not found.")).ToList();
+    }
 }
